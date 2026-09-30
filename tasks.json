@@ -1,0 +1,66 @@
+[
+    {
+        "task description": "complete python lesson 18",
+        "category": "coding",
+        "priority": "high",
+        "due date": "2026-09-30",
+        "completed date": null,
+        "status": "pending"
+    },
+    {
+        "task description": "finalise trabeculectomy methodology",
+        "category": "research",
+        "priority": "high",
+        "due date": "2026-10-01",
+        "completed date": null,
+        "status": "pending"
+    },
+    {
+        "task description": "practise SQL CTEs",
+        "category": "learning",
+        "priority": "medium",
+        "due date": "2026-09-29",
+        "completed date": "2026-09-29",
+        "status": "completed"
+    },
+    {
+        "task description": "Update Resume",
+        "category": "career",
+        "priority": "high",
+        "due date": "2026-09-29",
+        "completed date": "2026-09-29",
+        "status": "completed"
+    },
+    {
+        "task description": "prepare baby hospital bag",
+        "category": "personal",
+        "priority": "high",
+        "due date": "2026-11-30",
+        "completed date": null,
+        "status": "pending"
+    },
+    {
+        "task description": "organise GitHub projects",
+        "category": "career",
+        "priority": "low",
+        "due date": "2026-11-01",
+        "completed date": null,
+        "status": "pending"
+    },
+    {
+        "task description": "review orbital CT anatomy",
+        "category": "research",
+        "priority": "medium",
+        "due date": "2026-10-03",
+        "completed date": null,
+        "status": "pending"
+    },
+    {
+        "task description": "buy breastfeeding supplies",
+        "category": "baby",
+        "priority": "medium",
+        "due date": "2026-11-01",
+        "completed date": null,
+        "status": "pending"
+    }
+]
