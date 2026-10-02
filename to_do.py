@@ -94,6 +94,7 @@ def complete_task():
     
     if not tasks:
         print("There are no tasks to complete.")
+        return
         
     view_tasks(tasks)
         
@@ -158,12 +159,13 @@ def delete_task():
     
     save_task(tasks)
     
-    print(f"You have just deleted Task {task_number} and it is {deleted_task["Status"]}")
-    print(f"Description: {deleted_task["Task Description"]}")
-    print(f"Category: {deleted_task["Category"]}")
-    print(f"Priority: {deleted_task["Priority"]}")
-    print(f"Start Date: {deleted_task["Start Date"]}")
-    print(f"Date of Accomplishment: {deleted_task["Date of Accomplishment"]}")
+    print(f"You have just deleted Task {task_number} and it is {deleted_task["status"]}")
+    print(f"Description: {deleted_task["task description"]}")
+    print(f"Category: {deleted_task["category"]}")
+    print(f"Priority: {deleted_task["priority"]}")
+    print(f"Due Date: {deleted_task["due date"]}")
+    print(f"Completed Date: {deleted_task["completed date"]}")
+    print(f"status: {deleted_task["status"]}")
     
     return deleted_task
 
@@ -314,7 +316,8 @@ while True:
     if choice == "1":
         add_task()
     elif choice == "2":
-        view_tasks()
+        tasks = load_tasks()
+        view_tasks(tasks)
     elif choice == "3":
         complete_task()
     elif choice == "4":
