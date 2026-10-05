@@ -18,22 +18,34 @@ FILTER_CHOICES = [
 
 DATE_FILTERS = ["due date", "completed date"]
 
+FIELD_CHOICES = ["1", "2", "3", "4"]
+
+def get_non_empty_input(prompt):
+    while True:
+        value = input(prompt).strip()
+
+        if not value:
+            print("This field cannot be empty.")
+        else:
+            return value
+        
+def get_valid_date(prompt):
+    while True:
+        value = input(prompt).strip()
+        
+        try:
+            converted_value = datetime.strptime(value, "%Y-%m-%d").date().isoformat()
+            break
+        
+        except ValueError:
+                    print("❌ Invalid format. Please use exactly YYYY-MM-DD (e.g., 2026-09-29).")
+                    
+    return converted_value
+
 def get_task():
-    while True:
-        task_desc = input("What task do you want to handle? ").strip()
-        
-        if not task_desc:
-            print("This field cannot be empty.")
-        else:
-            break
+    task_desc = get_non_empty_input("What task do you want to handle? ")
             
-    while True:
-        category = input("What category does this task belong to? ").strip()
-        
-        if not category:
-            print("This field cannot be empty.")
-        else:
-            break
+    category = get_non_empty_input("What category does this task belong to? ")
             
     while True:
         priority = input("Enter a priority level of High, Medium or Low: ").strip().lower()
@@ -45,22 +57,13 @@ def get_task():
         else:
             break
     
-    while True:
-        due_date = input("Enter a date for which this task is due (YYYY-MM-DD): ").strip()
-        
-        try:
-            
-            converted_due_date = datetime.strptime(due_date, "%Y-%m-%d").date()
-            break
-            
-        except ValueError:
-            print("❌ Invalid format. Please use exactly YYYY-MM-DD (e.g., 2026-09-29).")
+    due_date = get_valid_date("Enter a date for which this task is due (YYYY-MM-DD): ")
     
     task = {
         "task description": task_desc,
         "category": category,
         "priority": priority,
-        "due date": converted_due_date.isoformat(),
+        "due date": due_date,
         "completed date": None,
         "status": "pending"
     }
@@ -217,127 +220,116 @@ def return_deleted_task(task_index, deleted_task):
 
 def edit_task():
     tasks = load_tasks()
-    
+
     if not tasks:
         print("There are no tasks to be edited.")
         return
-        
+
     view_tasks(tasks)
-    
+
     while True:
         try:
-            choice = int(input("Which task do you want to edit?"))
-            
+            choice = int(input("Which task do you want to edit? "))
+
             if choice <= 0 or choice > len(tasks):
                 print(f"Task number should be between 1 and {len(tasks)}.")
                 continue
-    
+
             editable_task = tasks[choice - 1]
-    
-            print(f"You are about to edit '{editable_task["task description"].title()}'")
-    
+
+            print(
+                f"You are about to edit "
+                f"'{editable_task['task description'].title()}'"
+            )
+
             print("1. Task Description")
             print("2. Category")
             print("3. Priority")
             print("4. Due Date")
 
-            field_choices = ["1", "2", "3", "4"]
-            
             while True:
-                field_choice = input("What would you like to edit in this task? ")
-                
-                if field_choice not in field_choices:
-                    print("Please pick an option (number) from the menu displayed")
-                    
-                else:
-                    if field_choice == "1":
-                        while True:
-                            editable_task["task description"] = input("Please edit the task description: ").strip()
-                
-                            if not editable_task["task description"]:
-                                print("Field cannot be empty.")
-                            else:
-                                break
-        
-                    elif field_choice == "2":
-                        while True:
-                            editable_task["category"] = input("Please edit the category of this task: ").strip()
-                
-                            if not editable_task["category"]:
-                                print("Field cannot be empty.")
-                            else:
-                                break
-                
-                    elif field_choice == "3":
-                        while True:
-                            editable_task["priority"] = input("Enter a new priority level of high, medium or low: ").strip().lower()
-                
-                            if not editable_task["priority"]:
-                                print("Field cannot be empty.")
-                            elif editable_task["priority"] not in PRIORITY_LEVELS:
-                                print("Priority level has to be high, medium or low")
-                            else:
-                                break
-                
-                    elif field_choice == "4":
-                        while True:
-                            editable_task["due date"] = input("Please edit the 'Due Date' field in this format (YYYY-MM-DD): ").strip()
-                    
-                            try:
-                                converted_due_date = datetime.strptime(editable_task["due date"], "%Y-%m-%d").date()
-                                editable_task["due date"] = converted_due_date.isoformat()
-                                break
-                        
-                            except ValueError:
-                                print("❌ Invalid format. Please use exactly YYYY-MM-DD (e.g., 2026-09-29).")
-                                
-                    break
-                
+                field_choice = input(
+                    "What would you like to edit in this task? "
+                ).strip()
+
+                if field_choice not in FIELD_CHOICES:
+                    print("Please pick an option (number) from the menu displayed.")
+                    continue
+
+                if field_choice == "1":
+                    editable_task["task description"] = get_non_empty_input(
+                        "Please edit the task description: "
+                    )
+
+                elif field_choice == "2":
+                    editable_task["category"] = get_non_empty_input(
+                        "Please edit the category of this task: "
+                    )
+
+                elif field_choice == "3":
+                    while True:
+                        priority = input(
+                            "Enter a new priority level of high, medium or low: "
+                        ).strip().lower()
+
+                        if not priority:
+                            print("This field cannot be empty.")
+                        elif priority not in PRIORITY_LEVELS:
+                            print("Priority level has to be high, medium or low.")
+                        else:
+                            editable_task["priority"] = priority
+                            break
+
+                elif field_choice == "4":
+                    editable_task["due date"] = get_valid_date(
+                        "Please edit the 'Due Date' field in this format (YYYY-MM-DD): "
+                    )
+
+                break
+
         except ValueError:
             print("Please enter the task number you want to edit.")
             continue
-        
+
         save_task(tasks)
+        print("Task successfully updated.")
         break
     
 def filter_():
     tasks = load_tasks()
-    
-    print("================\nFilter Tasks\n================")
+
+    print("================")
+    print("Filter Tasks")
+    print("================")
     print("Category")
     print("Priority")
     print("Due Date")
     print("Completed Date")
     print("Status")
-    
+
     if not tasks:
         print("There are no tasks to filter.")
         return
 
-    choice = input("What do you want to filter by? ").strip().lower()
-    
+    choice = get_non_empty_input(
+        "What do you want to filter by? "
+    ).lower()
+
     if choice not in FILTER_CHOICES:
         print("Invalid filter option.")
         return
-    
+
     if choice in DATE_FILTERS:
-        while True:
-            keyword_choice = input("Enter date to search (YYYY-MM-DD): ").strip()
-        
-            try:
-                converted_date = datetime.strptime(keyword_choice, "%Y-%m-%d").date()
-            
-                keyword_choice = converted_date.isoformat()
-                break
-            
-            except ValueError:
-                print("❌ Invalid date. Please use YYYY-MM-DD.")
-            
+        keyword_choice = get_valid_date(
+            "Enter date to search (YYYY-MM-DD): "
+        )
     else:
-        keyword_choice = input("Enter keyword to search: ").strip().lower()
+        keyword_choice = get_non_empty_input(
+            "Enter keyword to search: "
+        ).lower()
 
     filtered_tasks = []
-    
+
     for task in tasks:
         if task[choice] is not None and task[choice].lower() == keyword_choice:
             filtered_tasks.append(task)
