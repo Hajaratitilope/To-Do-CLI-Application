@@ -8,6 +8,16 @@ import os
 
 PRIORITY_LEVELS = ["high", "medium", "low"]
 
+FILTER_CHOICES = [
+    "category",
+    "priority",
+    "status",
+    "due date",
+    "completed date"
+]
+
+DATE_FILTERS = ["due date", "completed date"]
+
 def get_task():
     while True:
         task_desc = input("What task do you want to handle? ").strip()
@@ -124,10 +134,21 @@ def complete_task():
 def view_completed_task():
     tasks = load_tasks()
     
+    num_completed_tasks = 0
+    
+    for task in tasks:
+        if task["status"] == "completed":
+            num_completed_tasks += 1
+            
+    if num_completed_tasks == 0:
+        print("There are no completed tasks.")
+        return
+    
     a = "=" * len("Congratulations! The following tasks have been completed")
     print(f"{a}\nCongratulations! The following tasks have been completed\n{a}")
     
     for index, task in enumerate(tasks, start=1):
+                
         if task["status"] == "completed":
             print(f"Task {index}: {task["task description"]}")
             
@@ -151,34 +172,48 @@ def view_pending_tasks():
 def delete_task():
     tasks = load_tasks()
     
+    if not tasks:
+        print("There are no tasks recorded for deletion.")
+        return None, None
+    
     view_tasks(tasks)
+        
+    while True:
+        try:
+            task_number = int(input("Provide the task number of the task you are about to delete: "))
+            
+            if task_number <= 0 or task_number > len(tasks):
+                print(f"Task number has to be between 1 and {len(tasks)}")
+                continue
+                
+            task_index = task_number -1    
+            deleted_task = tasks.pop(task_index)
     
-    task_number = int(input("Provide the task number of the task you are about to delete: "))
+            save_task(tasks)
     
-    deleted_task = tasks.pop(task_number - 1)
-    
-    save_task(tasks)
-    
-    print(f"You have just deleted Task {task_number} and it is {deleted_task["status"]}")
-    print(f"Description: {deleted_task["task description"]}")
-    print(f"Category: {deleted_task["category"]}")
-    print(f"Priority: {deleted_task["priority"]}")
-    print(f"Due Date: {deleted_task["due date"]}")
-    print(f"Completed Date: {deleted_task["completed date"]}")
-    print(f"status: {deleted_task["status"]}")
-    
-    return deleted_task
+            print(f"You have just deleted Task {task_number} and it is {deleted_task["status"]}")
+            print(f"Description: {deleted_task["task description"]}")
+            print(f"Category: {deleted_task["category"]}")
+            print(f"Priority: {deleted_task["priority"]}")
+            print(f"Due Date: {deleted_task["due date"]}")
+            print(f"Completed Date: {deleted_task["completed date"]}")
+            print(f"status: {deleted_task["status"]}")
+            
+            break
+        
+        except ValueError:
+            print("Enter a number")
+            
+    return deleted_task, task_index
 
-#deleted_task = delete_task()
-
-def return_deleted_task(deleted_task):
+def return_deleted_task(task_index, deleted_task):
     tasks = load_tasks()
     
-    tasks.append(deleted_task)
+    tasks.insert(task_index, deleted_task)
     
     save_task(tasks)
     
-#return_deleted_task(deleted_task)
+    print("You have successfully undone the deleted task.")
 
 def edit_task():
     tasks = load_tasks()
@@ -271,6 +306,8 @@ def filter_():
     print("================\nFilter Tasks\n================")
     print("Category")
     print("Priority")
+    print("Due Date")
+    print("Completed Date")
     print("Status")
     
     if not tasks:
@@ -279,22 +316,38 @@ def filter_():
 
     choice = input("What do you want to filter by? ").strip().lower()
     
-    if choice not in tasks[0]:
+    if choice not in FILTER_CHOICES:
         print("Invalid filter option.")
         return
     
-    keyword_choice = input("Enter keyword to search: ").strip().lower()
+    if choice in DATE_FILTERS:
+        while True:
+            keyword_choice = input("Enter date to search (YYYY-MM-DD): ").strip()
+        
+            try:
+                converted_date = datetime.strptime(keyword_choice, "%Y-%m-%d").date()
+            
+                keyword_choice = converted_date.isoformat()
+                break
+            
+            except ValueError:
+                print("❌ Invalid date. Please use YYYY-MM-DD.")
+            
+    else:
+        keyword_choice = input("Enter keyword to search: ").strip().lower()
 
     filtered_tasks = []
     
     for task in tasks:
-        if task[choice].lower() == keyword_choice:
+        if task[choice] is not None and task[choice].lower() == keyword_choice:
             filtered_tasks.append(task)
 
     if filtered_tasks:
         view_tasks(filtered_tasks)
     else:
         print("No matching tasks found.")
+        
+deleted_task = None
 
 while True:
     print()
@@ -327,10 +380,14 @@ while True:
     elif choice == "6":
         edit_task()
     elif choice == "7":
-        delete_task()
+        deleted_task, task_index = delete_task()
     elif choice == "8":
         filter_()
     elif choice == "9":
-        return_deleted_task()
+        if deleted_task is None:
+            print("Nothing to undo.")
+        else:
+            return_deleted_task(task_index, deleted_task)
+            deleted_task = None
     elif choice == "10":
         break
